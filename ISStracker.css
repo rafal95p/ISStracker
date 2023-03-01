@@ -1,0 +1,35 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+/*/// map section ///*/
+#mapSection {
+    text-align: center;
+}
+#ISSmarker {
+    background-image: url("iis_marker.png");
+    background-size: contain;
+    height: 50px;
+    position: absolute;
+    text-align: center;
+    width: 50px;
+    z-index: 1;
+}
+img {
+    margin: 10px;
+    object-fit: content;
+    width: 80%;
+}
+
+/*/// data section ///*/
+#dataSection {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+.reading {
+    margin: 0;
+    padding: 10px;
+    text-align: center;
+}
