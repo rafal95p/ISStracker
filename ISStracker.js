@@ -1,5 +1,5 @@
 window.addEventListener('load', () => {
-    setInterval(getIssPosition, 2000)
+    setInterval(getIssPosition, 3000);
 })
 
 function getIssPosition() {
@@ -10,64 +10,90 @@ function getIssPosition() {
 }
 
 function displayIssPosition(data) {
-    const currentIssPosition = parseJson(data);
+    const currentIssPosition = parseIssPosition(data);
     const mapSize = getMapSize();
     drawOnMap(currentIssPosition, mapSize);
     displayReadings(currentIssPosition);
 }
 
-function parseJson(data) {
+function parseIssPosition(data) {
     const currentIssPosition = {
-        "altitude" : data.altitude,
-        "latitude" : data.latitude,
-        "longitude" : data.longitude,
-        "timestamp" : new Date(data.timestamp * 1000), 
-        "velocity" : data.velocity
+        altitude : data.altitude,
+        latitude : data.latitude,
+        longitude : data.longitude,
+        timestamp : new Date(data.timestamp * 1000), 
+        velocity : data.velocity
     };
     return currentIssPosition;     
 }
 
 function getMapSize() {
-    const map = document.getElementById("world_map");
+    const map = document.getElementById("world_map").getBoundingClientRect();
     const mapSize = {
-        "positionX" : map.getBoundingClientRect().x,
-        "positionY" : map.getBoundingClientRect().y,
-        "width" : map.getBoundingClientRect().width,
-        "height" : map.getBoundingClientRect().height
+        positionX : map.x,
+        positionY : map.y,
+        width : map.width,
+        height : map.height
     };
     return mapSize; 
 }
 
 function displayReadings(currentIssPosition) {
     const decimalPrecision = 2;
-    document.getElementById('altitude').textContent = "wysokość: " + currentIssPosition.altitude.toFixed(decimalPrecision) + " km";
-    document.getElementById('latitude').textContent = "szerokość: " + currentIssPosition.latitude.toFixed(decimalPrecision) + latitudeDirection(currentIssPosition.latitude);
-    document.getElementById('longitude').textContent = "długość: " + currentIssPosition.longitude.toFixed(decimalPrecision) + longitudeDirection(currentIssPosition.longitude);
-    document.getElementById('timestamp').textContent = "czas: " + currentIssPosition.timestamp;
-    document.getElementById('velocity').textContent = "prędkość: " + currentIssPosition.velocity.toFixed(decimalPrecision) + " km/h";
+    document.getElementById('altitude').textContent = "wysokość: " + stringifyAltitude(currentIssPosition.altitude, decimalPrecision);
+    document.getElementById('latitude').textContent = "szerokość: " + stringifyLatitude(currentIssPosition.latitude, decimalPrecision);
+    document.getElementById('longitude').textContent = "długość: " + stringifyLongitude(currentIssPosition.longitude, decimalPrecision);
+    document.getElementById('timestamp').textContent = "czas: " + stringifyTimestamp(currentIssPosition.timestamp);
+    document.getElementById('velocity').textContent = "prędkość: " + stringifyVelocity(currentIssPosition.velocity, decimalPrecision);
 }
 
-function latitudeDirection(latitude) {
-    return (latitude >= 0) ? "N" : "S";
+function stringifyAltitude(altitude, decimalPrecision) {
+    return altitude.toFixed(decimalPrecision) + " km";
 }
 
-function longitudeDirection(longitude) {
-    return (longitude >= 0) ? "E" : "W";    
+function stringifyLatitude(latitude, decimalPrecision) {
+    return latitude.toFixed(decimalPrecision) + ((latitude >= 0) ? " N" : " S");
+}
+
+function stringifyLongitude(longitude, decimalPrecision) {
+    return longitude.toFixed(decimalPrecision) + ((longitude >= 0) ? " E" : " W");
+}
+
+function stringifyTimestamp(timestamp) {
+    return timestamp.toString().slice(0, 24);
+}
+
+function stringifyVelocity(velocity, decimalPrecision) {
+    return velocity.toFixed(decimalPrecision) + " km/h";
 }
 
 function drawOnMap(currentIssPosition, mapSize) {
-    const ISSmarker = document.getElementById("ISSmarker");
-    const ISSmarkerSize = ISSmarker.getBoundingClientRect().width;
+    const ISSicon = document.getElementById("ISSicon");
+    const ISSiconSize = ISSicon.getBoundingClientRect().width;
 
     const scalledLatitude = (-1 * (currentIssPosition.latitude) + 90)/180;
-    const newPositionY = mapSize.positionY - (ISSmarkerSize/2) + (scalledLatitude * mapSize.height);
+    const newPositionY = mapSize.positionY - (ISSiconSize/2) + (scalledLatitude * mapSize.height);
     if (newPositionY !== 0) { 
-        ISSmarker.style.setProperty("top", newPositionY + "px");
+        ISSicon.style.setProperty("top", newPositionY + "px");
     }
 
     const scalledLongitude = (1 * (currentIssPosition.longitude) + 180)/360;
-    const newPositionX = mapSize.positionX - (ISSmarkerSize/2) + (scalledLongitude * mapSize.width);
+    const newPositionX = mapSize.positionX - (ISSiconSize/2) + (scalledLongitude * mapSize.width);
     if (newPositionX !== 0) { 
-        ISSmarker.style.setProperty("left", newPositionX + "px");
+        ISSicon.style.setProperty("left", newPositionX + "px");
     }
+
+    addISSmarker((newPositionX + (ISSiconSize/2) - 1), (newPositionY + (ISSiconSize/2) - 1));
+}
+
+function addISSmarker(positionX, positionY) {
+ 
+    const ISSmap = document.getElementById("mapSection");
+    const ISSmarker = document.createElement("div");
+
+    ISSmarker.setAttribute("class", "ISSmarker");
+    ISSmarker.style.setProperty("top", positionY + "px");
+    ISSmarker.style.setProperty("left", positionX + "px");
+
+    ISSmap.appendChild(ISSmarker);
 }
